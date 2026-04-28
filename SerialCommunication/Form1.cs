@@ -14,9 +14,15 @@ namespace SerialCommunication
 {
     public partial class Form1 : Form
     {
+        private SerialPort serialPortArduino;
         public Form1()
         {
             InitializeComponent();
+
+            // instantiate serial port and set timeouts (milliseconds)
+            serialPortArduino = new SerialPort();
+            serialPortArduino.ReadTimeout = 1000;
+            serialPortArduino.WriteTimeout = 1000;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -54,7 +60,35 @@ namespace SerialCommunication
 
         private void buttonConnect_Click(object sender, EventArgs e)
         {
-            // abc def ghi jkl
+            try
+            {
+                if (serialPortArduino.IsOpen)
+                {
+                    // we are connected — disconnect
+                    serialPortArduino.Close();
+                    buttonConnect.Text = "Connect";
+                    buttonConnect.BackColor = System.Drawing.Color.Blue;
+                }
+                else
+                {
+                    // not connected — set necessary properties and open
+                    if (comboBoxPoort.SelectedItem != null)
+                        serialPortArduino.PortName = comboBoxPoort.SelectedItem.ToString();
+
+                    int baud = 115200;
+                    if (comboBoxBaudrate.SelectedItem != null)
+                        int.TryParse(comboBoxBaudrate.SelectedItem.ToString(), out baud);
+                    serialPortArduino.BaudRate = baud;
+
+                    serialPortArduino.Open();
+                    buttonConnect.Text = "Disconnect";
+                    buttonConnect.BackColor = System.Drawing.Color.Red;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Fout bij (dis)connect: " + ex.Message);
+            }
         }
     }
 }
