@@ -126,6 +126,8 @@
             // 
             // buttonConnect
             // 
+            this.buttonConnect.BackColor = System.Drawing.Color.Blue;
+            this.buttonConnect.ForeColor = System.Drawing.Color.White;
             this.buttonConnect.Location = new System.Drawing.Point(256, 14);
             this.buttonConnect.Margin = new System.Windows.Forms.Padding(4);
             this.buttonConnect.Name = "buttonConnect";
@@ -133,8 +135,6 @@
             this.buttonConnect.TabIndex = 7;
             this.buttonConnect.Text = "Connect";
             this.buttonConnect.UseVisualStyleBackColor = false;
-            this.buttonConnect.BackColor = System.Drawing.Color.Blue;
-            this.buttonConnect.ForeColor = System.Drawing.Color.White;
             this.buttonConnect.Click += new System.EventHandler(this.buttonConnect_Click);
             // 
             // labelPoort
@@ -581,6 +581,7 @@
             this.checkBoxDigital2.TabIndex = 0;
             this.checkBoxDigital2.Text = "Digital 2";
             this.checkBoxDigital2.UseVisualStyleBackColor = true;
+            this.checkBoxDigital2.CheckedChanged += new System.EventHandler(this.checkBoxDigital2_CheckedChanged);
             // 
             // tabPageOefening2
             // 
