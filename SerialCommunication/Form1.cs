@@ -16,6 +16,7 @@ namespace SerialCommunication
     {
         private SerialPort serialPortArduino;
         private System.Windows.Forms.Timer timerOefening3;
+        private System.Windows.Forms.Timer timerOefening4;
         public Form1()
         {
             InitializeComponent();
@@ -30,7 +31,12 @@ namespace SerialCommunication
             timerOefening3.Interval = 1000; // 1000 ms
             timerOefening3.Tick += timerOefening3_Tick;
             timerOefening3.Enabled = false;
-            // handle tab selection changes to enable/disable the timer
+            // timer for oefening 4 (interval in milliseconds)
+            timerOefening4 = new System.Windows.Forms.Timer();
+            timerOefening4.Interval = 1000; // 1000 ms
+            timerOefening4.Tick += timerOefening4_Tick;
+            timerOefening4.Enabled = false;
+            // handle tab selection changes to enable/disable the timers
             tabControl.SelectedIndexChanged += tabControl_SelectedIndexChanged;
         }
 
@@ -281,10 +287,8 @@ namespace SerialCommunication
         {
             try
             {
-                if (tabControl.SelectedTab == tabPageOefening3)
-                    timerOefening3.Enabled = true;
-                else
-                    timerOefening3.Enabled = false;
+                timerOefening3.Enabled = (tabControl.SelectedTab == tabPageOefening3);
+                timerOefening4.Enabled = (tabControl.SelectedTab == tabPageOefening4);
             }
             catch (Exception ex)
             {
@@ -332,6 +336,34 @@ namespace SerialCommunication
                 else
                     value = response.Trim();
                 radioButtonDigital7.Checked = (value == "1");
+            }
+            catch (Exception ex)
+            {
+                labelStatus.Text = "Error: " + ex.Message;
+            }
+        }
+
+        private void timerOefening4_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino == null || !serialPortArduino.IsOpen) return;
+
+                // remove any previous data from Arduino
+                try { serialPortArduino.ReadExisting(); } catch { }
+
+                string response = string.Empty;
+                string value = string.Empty;
+
+                // analog 0
+                serialPortArduino.WriteLine("get a0");
+                try { response = serialPortArduino.ReadLine(); } catch (TimeoutException) { response = string.Empty; }
+                if (!string.IsNullOrEmpty(response) && response.Contains(":"))
+                    value = response.Split(':')[1].Trim();
+                else
+                    value = response.Trim();
+
+                labelAnalog0.Text = value;
             }
             catch (Exception ex)
             {
