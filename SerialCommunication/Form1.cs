@@ -17,6 +17,7 @@ namespace SerialCommunication
         private SerialPort serialPortArduino;
         private System.Windows.Forms.Timer timerOefening3;
         private System.Windows.Forms.Timer timerOefening4;
+        private System.Windows.Forms.Timer timerOefening5;
         public Form1()
         {
             InitializeComponent();
@@ -36,6 +37,11 @@ namespace SerialCommunication
             timerOefening4.Interval = 1000; // 1000 ms
             timerOefening4.Tick += timerOefening4_Tick;
             timerOefening4.Enabled = false;
+            // timer for oefening 5 (interval in milliseconds)
+            timerOefening5 = new System.Windows.Forms.Timer();
+            timerOefening5.Interval = 1000; // 1000 ms
+            timerOefening5.Tick += timerOefening5_Tick;
+            timerOefening5.Enabled = false;
             // handle tab selection changes to enable/disable the timers
             tabControl.SelectedIndexChanged += tabControl_SelectedIndexChanged;
         }
@@ -289,6 +295,7 @@ namespace SerialCommunication
             {
                 timerOefening3.Enabled = (tabControl.SelectedTab == tabPageOefening3);
                 timerOefening4.Enabled = (tabControl.SelectedTab == tabPageOefening4);
+                timerOefening5.Enabled = (tabControl.SelectedTab == tabPageOefening5);
             }
             catch (Exception ex)
             {
@@ -369,6 +376,67 @@ namespace SerialCommunication
             {
                 labelStatus.Text = "Error: " + ex.Message;
             }
+        }
+
+        private void timerOefening5_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino == null || !serialPortArduino.IsOpen) return;
+
+                // remove any previous data from Arduino
+                try { serialPortArduino.ReadExisting(); } catch { }
+
+                string response = string.Empty;
+                string value = string.Empty;
+
+                // analog 0 (gewenste temperatuur)
+                serialPortArduino.WriteLine("get a0");
+                try { response = serialPortArduino.ReadLine(); } catch (TimeoutException) { response = string.Empty; }
+                if (!string.IsNullOrEmpty(response) && response.Contains(":"))
+                    value = response.Split(':')[1].Trim();
+                else
+                    value = response.Trim();
+                int rawA0 = 0;
+                int.TryParse(value, out rawA0);
+
+                // analog 1 (huidige temperatuur)
+                try { serialPortArduino.ReadExisting(); } catch { }
+                serialPortArduino.WriteLine("get a1");
+                try { response = serialPortArduino.ReadLine(); } catch (TimeoutException) { response = string.Empty; }
+                if (!string.IsNullOrEmpty(response) && response.Contains(":"))
+                    value = response.Split(':')[1].Trim();
+                else
+                    value = response.Trim();
+                int rawA1 = 0;
+                int.TryParse(value, out rawA1);
+
+                // rescaling
+                double slope0 = 40.0 / 1023.0; // 5..45°C
+                double offset0 = 5.0;
+                double gewenste = Math.Round(slope0 * rawA0 + offset0, 1);
+
+                double slope1 = 500.0 / 1023.0; // 0..500°C
+                double offset1 = 0.0;
+                double huidig = Math.Round(slope1 * rawA1 + offset1, 1);
+
+                // update UI
+                labelGewensteTemp.Text = string.Format("{0:0.0} °C", gewenste);
+                labelHuidigeTemp.Text = string.Format("{0:0.0} °C", huidig);
+
+                // LED aansturen (D2)
+                string cmd = (huidig < gewenste) ? "set d2 on" : "set d2 off";
+                serialPortArduino.WriteLine(cmd);
+            }
+            catch (Exception ex)
+            {
+                labelStatus.Text = "Error: " + ex.Message;
+            }
+        }
+
+        private void label9_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -839,11 +839,12 @@
             this.label9.Size = new System.Drawing.Size(184, 20);
             this.label9.TabIndex = 1;
             this.label9.Text = "Gewenste Temperatuur";
+            this.label9.Click += new System.EventHandler(this.label9_Click);
             // 
             // pictureBox5
             // 
             this.pictureBox5.Image = global::SerialCommunication.Properties.Resources.thermostat;
-            this.pictureBox5.Location = new System.Drawing.Point(32, 22);
+            this.pictureBox5.Location = new System.Drawing.Point(28, 21);
             this.pictureBox5.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox5.Name = "pictureBox5";
             this.pictureBox5.Size = new System.Drawing.Size(845, 431);
