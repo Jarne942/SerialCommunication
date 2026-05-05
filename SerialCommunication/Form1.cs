@@ -167,5 +167,45 @@ namespace SerialCommunication
                 labelStatus.Text = "Error: " + ex.Message;
             }
         }
+
+        private void checkBoxDigital3_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino == null || !serialPortArduino.IsOpen)
+                {
+                    MessageBox.Show("Geen open seriële verbinding.");
+                    return;
+                }
+
+                string command = checkBoxDigital3.Checked ? "set d3 high" : "set d3 low";
+                serialPortArduino.WriteLine(command);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Fout bij verzenden: " + ex.Message);
+                labelStatus.Text = "Error: " + ex.Message;
+            }
+        }
+
+        private void checkBoxDigital4_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino == null || !serialPortArduino.IsOpen)
+                {
+                    MessageBox.Show("Geen open seriële verbinding.");
+                    return;
+                }
+
+                string command = checkBoxDigital4.Checked ? "set d4 high" : "set d4 low";
+                serialPortArduino.WriteLine(command);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Fout bij verzenden: " + ex.Message);
+                labelStatus.Text = "Error: " + ex.Message;
+            }
+        }
     }
 }
