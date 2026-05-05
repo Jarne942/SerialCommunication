@@ -15,6 +15,7 @@ namespace SerialCommunication
     public partial class Form1 : Form
     {
         private SerialPort serialPortArduino;
+        private System.Windows.Forms.Timer timerOefening3;
         public Form1()
         {
             InitializeComponent();
@@ -23,6 +24,14 @@ namespace SerialCommunication
             serialPortArduino = new SerialPort();
             serialPortArduino.ReadTimeout = 1000;
             serialPortArduino.WriteTimeout = 1000;
+
+            // timer for oefening 3 (interval in milliseconds)
+            timerOefening3 = new System.Windows.Forms.Timer();
+            timerOefening3.Interval = 1000; // 1000 ms
+            timerOefening3.Tick += timerOefening3_Tick;
+            timerOefening3.Enabled = false;
+            // handle tab selection changes to enable/disable the timer
+            tabControl.SelectedIndexChanged += tabControl_SelectedIndexChanged;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -204,6 +213,128 @@ namespace SerialCommunication
             catch (Exception ex)
             {
                 MessageBox.Show("Fout bij verzenden: " + ex.Message);
+                labelStatus.Text = "Error: " + ex.Message;
+            }
+        }
+
+        private void trackBarPWM9_Scroll(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino == null || !serialPortArduino.IsOpen)
+                {
+                    MessageBox.Show("Geen open seriële verbinding.");
+                    return;
+                }
+
+                string command = "set pwm9 " + trackBarPWM9.Value.ToString();
+                serialPortArduino.WriteLine(command);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Fout bij verzenden: " + ex.Message);
+                labelStatus.Text = "Error: " + ex.Message;
+            }
+        }
+
+        private void trackBarPWM10_Scroll(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino == null || !serialPortArduino.IsOpen)
+                {
+                    MessageBox.Show("Geen open seriële verbinding.");
+                    return;
+                }
+
+                string command = "set pwm10 " + trackBarPWM10.Value.ToString();
+                serialPortArduino.WriteLine(command);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Fout bij verzenden: " + ex.Message);
+                labelStatus.Text = "Error: " + ex.Message;
+            }
+        }
+
+        private void trackBarPWM11_Scroll(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino == null || !serialPortArduino.IsOpen)
+                {
+                    MessageBox.Show("Geen open seriële verbinding.");
+                    return;
+                }
+
+                string command = "set pwm11 " + trackBarPWM11.Value.ToString();
+                serialPortArduino.WriteLine(command);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Fout bij verzenden: " + ex.Message);
+                labelStatus.Text = "Error: " + ex.Message;
+            }
+        }
+
+        private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (tabControl.SelectedTab == tabPageOefening3)
+                    timerOefening3.Enabled = true;
+                else
+                    timerOefening3.Enabled = false;
+            }
+            catch (Exception ex)
+            {
+                labelStatus.Text = "Error: " + ex.Message;
+            }
+        }
+
+        private void timerOefening3_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino == null || !serialPortArduino.IsOpen) return;
+
+                // remove any previous data from Arduino
+                try { serialPortArduino.ReadExisting(); } catch { }
+
+                string response = string.Empty;
+                string value = string.Empty;
+
+                // digital 5
+                serialPortArduino.WriteLine("get d5");
+                try { response = serialPortArduino.ReadLine(); } catch (TimeoutException) { response = string.Empty; }
+                if (!string.IsNullOrEmpty(response) && response.Contains(":"))
+                    value = response.Split(':')[1].Trim();
+                else
+                    value = response.Trim();
+                radioButtonDigital5.Checked = (value == "1");
+
+                // digital 6
+                try { serialPortArduino.ReadExisting(); } catch { }
+                serialPortArduino.WriteLine("get d6");
+                try { response = serialPortArduino.ReadLine(); } catch (TimeoutException) { response = string.Empty; }
+                if (!string.IsNullOrEmpty(response) && response.Contains(":"))
+                    value = response.Split(':')[1].Trim();
+                else
+                    value = response.Trim();
+                radioButtonDigital6.Checked = (value == "1");
+
+                // digital 7
+                try { serialPortArduino.ReadExisting(); } catch { }
+                serialPortArduino.WriteLine("get d7");
+                try { response = serialPortArduino.ReadLine(); } catch (TimeoutException) { response = string.Empty; }
+                if (!string.IsNullOrEmpty(response) && response.Contains(":"))
+                    value = response.Split(':')[1].Trim();
+                else
+                    value = response.Trim();
+                radioButtonDigital7.Checked = (value == "1");
+            }
+            catch (Exception ex)
+            {
                 labelStatus.Text = "Error: " + ex.Message;
             }
         }
